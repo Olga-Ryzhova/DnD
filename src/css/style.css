@@ -1,0 +1,145 @@
+* {
+  box-sizing: border-box;
+  font-family:Arial, Helvetica, sans-serif;
+}
+
+.boards {
+  width: 100%;
+  background-color: #107abb;
+  display: flex;
+  justify-content: space-between;
+}
+
+.board-item {
+  position: relative;
+  justify-content: space-between;
+  width: calc(100% / 3);
+  margin: 10px 10px;
+  padding: 20px 20px;
+  background-color: #dee2e5;
+  border-radius: .40rem;
+
+  /* cursor: grab; */
+  display: flex;
+  flex-direction: column;
+}
+
+.board-header {
+  font-weight: 600;
+  color: #334e5e;
+}
+.ellipsis {
+  position: absolute;
+  right: 20px;
+  cursor: pointer;
+}
+
+.tasks {
+
+  margin-top: 20px;
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+}
+
+.add_task {
+  color: #86979f;
+  cursor: pointer;
+  font-size: 16px;
+  border: none;
+  background-color: #dee2e5;
+}
+
+.add_task:hover {
+  text-decoration:underline
+}
+
+.tasks_input {
+
+  background-color: #fff;
+  width: 440px;
+  min-height: 100px;
+  border: none;
+  font-size: 18px;
+  resize: none;
+}
+
+.tasks_input::placeholder {
+  font-size: 18px;
+} 
+
+.tasks_control {
+  position: absolute;
+  width: 100%;   
+}
+
+.card_add {
+  margin-top: 10px;
+  border: none;
+  background-color: #5ca84d;
+  color: #f0f6ef;
+  width: 150px;
+  height: 40px;
+  cursor: pointer;
+}
+
+.card_add:hover {
+  background-color: #549647;
+}
+
+.card_add:active {
+  background-color: #447c39;
+}
+
+.task {
+  display: flex;
+  justify-content: space-between;
+  padding: 2px 10px;
+  margin-bottom: 10px;
+  border-radius: 2px;
+  box-shadow: 0 1px 3px rgba(0,0,0,0.12), 0 1px 2px rgba(0,0,0,0.24);
+  width: 440px;
+  background-color: #fff;
+  /* height: 100%; */
+  cursor: grab;
+}
+
+.tasks_list {
+  margin-top: 10px;
+}
+
+.task_title {
+  /* flex-grow: 1; */
+  padding: 10px 5px;
+  width: 100%;
+
+}
+
+.task_remove {
+  color: #6c818c;
+  font-size: 30px;
+  text-decoration: none;
+  cursor: pointer;
+}
+
+
+.close_add {
+  color: #7b8d98;
+  border: none;
+  background-color: #dee2e5;
+  font-size: 30px;
+  vertical-align: middle;
+  cursor: pointer;
+}
+
+.close_add:hover {
+  color: #798791;
+} 
+
+.close_add:active {
+  color: #6d7a83;
+}
+
+.hidden {
+  display: none;
+}

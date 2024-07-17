@@ -1,3 +1,5 @@
 import "./css/style.css";
 
-import "./js/tasks.js";
+import "./js/addTasks.js";
+
+import "./js/dnd.js";

@@ -1,81 +1,142 @@
 import { drop } from "./dnd";
-const addTask = document.querySelectorAll(".add_task");
-const tasks = document.querySelectorAll(".tasks");
-const tasksList = document.querySelectorAll(".tasks_list");
-let listItems = [];
+
+const addTaskButtons = document.querySelectorAll(".add_task");
+const tasksLists = document.querySelectorAll(".tasks_list");
+
+// Функция для создания элемента textarea и кнопок для добавления задачи
+function createTextArea(taskList, button) {
+  taskList.insertAdjacentHTML(
+    "afterBegin",
+    `<textarea class="tasks_input" placeholder="Enter a title for this card..."></textarea>
+    <div class="buttons">
+      <button class="card_add">Add Card</button>
+      <button class="close_add">&times;</button>
+    </div>`
+  );
+
+  button.classList.add("hidden");
+}
+
+// добавление задачи
+function addTask(e, item) {
+  e.preventDefault();
+
+  const taskInput = document.querySelector(".tasks_input");
+  const tasksValue = taskInput.value.trim();
+
+  if (!tasksValue) return;
+
+  tasksLists[item].insertAdjacentHTML(
+    "afterBegin",
+    `<div class="task" draggable="true">
+      <div class="task_title">${tasksValue}</div>
+      <a class="task_remove">&times;</a>
+    </div>`
+  );
+
+  taskInput.value = "";
+
+  // Сохраняем состояние в localStorage
+  saveTasksState();
+
+  //вызываем удаление задачи
+  removeTask();
+
+  // Обновляем список задач для возможности перетаскивания
+  const listItems = document.querySelectorAll(".task");
+  drop(listItems);
+}
+
+// удаление задачи
+function removeTask() {
+  document.querySelectorAll(".task_remove").forEach((elem) => {
+    elem.addEventListener("click", () => {
+      elem.closest(".task").remove();
+
+      // Сохраняем состояние в localStorage после удаления задачи
+      saveTasksState();
+    });
+  });
+}
+
+// Функция для сохранения состояния задач в localStorage
+export function saveTasksState() {
+  // Создаем пустой объект для хранения состояния задач
+  const tasksData = {};
+
+  // Перебираем все списки задач
+  tasksLists.forEach((list, index) => {
+    // Получаем все задачи в текущем списке
+    const tasks = Array.from(list.querySelectorAll(".task")).
+    map((task) => task.querySelector(".task_title").textContent); // Извлекаем текст заголовка задачи и сохраняем в массив
+
+    // Сохраняем массив задач в объекте
+    tasksData[`list${index}`] = tasks; 
+  });
+
+  // Сохраняем объект состояния задач в localStorage
+  localStorage.setItem('tasksState', JSON.stringify(tasksData)); 
+}
+
+
+// Функция для восстановления состояния задач из LocalStorage
+function loadTasksState() {
+  // Получаем данные из localStorage или создаем пустой объект
+  const tasksData = JSON.parse(localStorage.getItem('tasksState') || '{}');
+
+  // Перебираем все сохраненные задачи
+  for (const [listIndex, tasks] of Object.entries(tasksData)) {
+    // Извлекаем числовую часть ключа
+    const index = parseInt(listIndex.replace('list', ''), 10);
+
+    // Проверяем, существует ли список с данным индексом
+    if (tasksLists[index]) {
+      // Перебираем все заголовки задач из сохраненных данных
+      tasks.forEach((taskTitle) => {
+        tasksLists[index].insertAdjacentHTML(
+          "beforeEnd",
+          `<div class="task" draggable="true">
+            <div class="task_title">${taskTitle}</div>
+            <a class="task_remove">&times;</a>
+          </div>`
+        );
+      });
+    }
+  }
+
+  //вызываем удаление задачи
+  removeTask();
+  
+  // Обновляем список задач для возможности перетаскивания
+  const listItems = document.querySelectorAll(".task");
+  drop(listItems);
+}
 
 // при нажатии на Add another card появлется окно для добавления задачи
-addTask.forEach((elem, item) => {
+addTaskButtons.forEach((elem, item) => {
   elem.addEventListener("click", (e) => {
     e.preventDefault();
 
-    // открытие textarea для написания задачи
-    createTextArea(tasks[item], elem);
+    createTextArea(tasksLists[item], elem);
 
     const column = e.target.closest(".board-item");
-    const tasksInput = document.querySelector(".tasks_input");
-    const btns = document.querySelector(".buttons");
 
-    // закрываем окно для добавления задачи
     const closeAdd = column.querySelector(".close_add");
-    const closeWindowAdd = (e) => {
+    closeAdd.addEventListener("click", (e) => {
       e.preventDefault();
-
       elem.classList.remove("hidden");
-      tasksInput.remove();
-      btns.remove();
-    };
+      document.querySelector(".tasks_input").remove();
+      document.querySelector(".buttons").remove();
+    });
 
-    // добавление задачи
     const cardAdd = column.querySelector(".card_add");
-    const pushTasks = (e) => {
-      e.preventDefault();
-
-      // получаем введенные значения из textarea
-      const taskInput = document.querySelector(".tasks_input");
-      const tasksValue = taskInput.value;
-
-      if (!tasksValue) return;
-
-      tasksList[item].insertAdjacentHTML(
-        "afterBegin",
-        `<div class="task"  draggable = "true">
-				<div class="task_title">${tasksValue}</div> 
-				<a class="task_remove">&times;</a>
-			</div>`,
-      );
-
-      // Очищаем поле после ввода задачи для возможности ввода новой задачи
-      taskInput.value = "";
-
-      // Удаление отдельной задачи
-      const task = document.querySelector(".task");
-      const taskRemove = document.querySelector(".task_remove");
-
-      taskRemove.addEventListener("click", () => {
-        task.remove();
-      });
-
-      // добавляем в массив получившиеся значения
-      listItems = document.querySelectorAll(".task");
-      drop(listItems);
-    };
-
-    closeAdd.addEventListener("click", closeWindowAdd);
-    cardAdd.addEventListener("click", pushTasks);
+    cardAdd.addEventListener("click", (e) => addTask(e, item));
   });
 });
 
-// открытие textarea для написания задачи
-function createTextArea(taskValue, elem) {
-  taskValue.insertAdjacentHTML(
-    "afterBegin",
-    `<textarea class="tasks_input" placeholder="Enter a title for this card..."></textarea>
-	<div class="buttons">
-		<button class="card_add">Add Card</button> 
-		<button class="close_add">&times;</button> 
-	</div>`,
-  );
+//  перетаскивание задач
+const initialTasks = document.querySelectorAll(".task");
+drop(initialTasks);
 
-  elem.classList.add("hidden");
-}
+// Вызов функции для восстановления состояния задач из localStorage
+loadTasksState();

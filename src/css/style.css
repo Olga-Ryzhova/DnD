@@ -126,6 +126,7 @@
   padding: 10px 5px;
   width: 100%;
   pointer-events: none;
+  white-space: pre-wrap;;
 }
 
 .task_remove {
@@ -157,3 +158,14 @@
   display: none;
 }
 
+.highlight {
+  background-color: #dbd7d7;
+  border: 2px solid #a39f9f;
+  margin-bottom: 10px;
+  min-height: 40px; 
+  position: relative;
+  border-radius: 2px;
+  z-index: 1000;
+  width: 440px;
+  pointer-events: none;
+}

@@ -1,98 +1,101 @@
-export function drop(listItems) {
-  // перетаскивание
-  const containers = document.querySelectorAll(".tasks_list");
-  const draggables = listItems;
+import { saveTasksState } from '../js/addTasks'; 
 
-  [...draggables].forEach((draggable) => {
+export function drop(listItems) {
+  const containers = document.querySelectorAll(".tasks_list");
+
+  listItems.forEach((draggable) => {
     draggable.addEventListener("dragstart", () => {
       draggable.classList.add("dragging");
     });
 
     draggable.addEventListener("dragend", () => {
       draggable.classList.remove("dragging");
+
+      // убираем выделение всех элементов после окончания перетаскивания
+      document.querySelectorAll(".highlight").forEach((elem) => {
+        elem.remove();
+      });
+
+      // Сохраняем состояние в LocalStorage после завершения перетаскивания
+      saveTasksState();
     });
   });
 
-  containers.forEach((contrainer) => {
-    contrainer.addEventListener("dragover", (e) => {
-      e.preventDefault();
+  containers.forEach((container) => {
+    container.addEventListener("dragover", (e) => {
+      e.preventDefault(); 
+
       // получаем текущий элемент, на котором произошло событие dragover
-      const currentElement = e.target;
+      const dragging = document.querySelector(".dragging");
+      const { clientX, clientY } = e;
+      
+      // Убираем выделение всех элементов перед установкой нового
+      document.querySelectorAll(".highlight").forEach((elem) => {
+        elem.remove();
+      });
+
+			// Определяем место для вставки задачи по вертикали (выше или ниже текущего элемента)
+			const nextElementY = getDropPositionY(clientY, container);
+			// Определяем место для вставки задачи по горизонтали (между задачами)
+			const nextElementX = getDropPositionX(clientX, container);
+
+      //Создаем элемент для выделения места вставки
+      const insertionPoint = document.createElement("div");
+      insertionPoint.className = "highlight";
+			const { height } = dragging.getBoundingClientRect();
+			insertionPoint.style.height = `${height}px`;
+
+			// Определяем место вставки по оси Y и X
+			if (nextElementY) {
+				container.insertBefore(insertionPoint, nextElementY);
+			} else if (nextElementX) {
+				container.insertBefore(insertionPoint, nextElementX);
+			} else {
+				container.appendChild(insertionPoint);
+			}
+    });
+
+    container.addEventListener("drop", (e) => {
+      e.preventDefault();
+      // Находим текущий перетаскиваемый элемент
       const dragging = document.querySelector(".dragging");
 
-      // определеяем, можно ли перетащить текущий элемент
-      const isMoveable =
-        dragging !== currentElement &&
-        currentElement.classList.contains("task");
-
-      // если нельзя перетащить, завершаем функцию
-      if (!isMoveable) {
-        return;
+      // Находим элемент highlight, чтобы вставить задачу на его место.
+      const insertionPoint = container.querySelector(".highlight");
+      
+      // Вставляем перетаскиваемый элемент перед элементом с классом highlight
+      if (insertionPoint) {
+        // вставляем перетаскиваемую задачу перед insertionPoint, если он существует. 
+        container.insertBefore(dragging, insertionPoint);
+        insertionPoint.remove(); // Убираем выделение после вставки
       }
-
-      // Вычисляется следующий элемент для перетаскивания
-      const nextElement = getDropPositionY(e.clientY, currentElement);
-
-      // Проверяется, является ли следующий элемент подходящим для перетаскивания.
-      if (
-        (nextElement && dragging === nextElement.previousElementSibling) ||
-        dragging === nextElement
-      ) {
-        dragging;
-        return;
-      }
-
-      // Текущий контейнер вставляет элемент с классом dragging перед следующим элементом
-      contrainer.insertBefore(dragging, nextElement);
-
-      // вычисляется позиция внутри контейнера для вставки элемента с классом dragging, если она есть
-      const dropTarget = getDropPositionX(contrainer, e.clientX);
-
-      // Если позиция найдена, текущий контейнер вставляет элемент с классом dragging в эту позицию.
-      if (dropTarget) {
-        contrainer.insertBefore(dragging, dropTarget);
-      }
+      // Сохраняем состояние в LocalStorage после завершения перетаскивания
+      saveTasksState();
     });
   });
 
-  const getDropPositionX = (container, x) => {
-    // получаем все элементы с классом draggable, кроме элементов с классом dragging
-    const draggableElements = [
-      ...container.querySelectorAll(".draggable:not(.dragging)"),
-    ];
+  // Функция для определения горизонтальной позиции для вставки задачи.
+  function getDropPositionX(x, container) {
+    // Получаем все задачи в контейнере, кроме текущей перетаскиваемой.
+    const tasks = Array.from(container.querySelectorAll(".task:not(.dragging)"));
+    // Находим задачу, у которой левая граница находится правее позиции курсора.
+    return tasks.find((task) => {
+      const { left, right } = task.getBoundingClientRect();
+      return x < (left + right) / 2;
+    });
+  }
 
-    // получаем данные элементы в цикле
-    for (const draggable of draggableElements) {
-      // для каждого элемента вычисляем  его позицию
-      const pos = draggable.getBoundingClientRect();
+	// Функция для определения вертикальной позиции для вставки задачи.
+	function getDropPositionY(y, container) {
+    // Получаем все задачи в контейнере, кроме текущей перетаскиваемой.
+    const tasks = Array.from(container.querySelectorAll(".task:not(.dragging)"));
 
-      // Если значение x больше значения left позиции элемента, то функция возвращает текущий элемент.
-      // элемент подходит для вставки в него элемента с классом dragging
-      if (x > pos.left) {
-        return draggable;
+    // Находим задачу, у которой верхняя граница находится ниже позиции курсора.
+    for (const task of tasks) {
+      const { top, bottom } = task.getBoundingClientRect();
+      if (y < top + (bottom - top) / 2) {
+        return task;
       }
     }
-    // Если ни один из элементов не подходит, возвращаем null.
-    return null;
-  };
-
-  const getDropPositionY = (cursorPosition, currentElement) => {
-    // для каждого элемента вычисляем  его позицию
-    const currentElementCoord = currentElement.getBoundingClientRect();
-
-    // Вычисляем центр текущего элемента
-    const currentElementCenter =
-      currentElementCoord.y + currentElementCoord.height / 2;
-
-    // Проверяем положение курсора относительно центра текущего элемента.
-    // Если курсор находится слева от центра, то следующий элемент после текущего — это элемент, который будет целью перетаскивания.
-    // Если курсор справа от центра, текущий элемент остаётся целью перетаскивания.
-    const nextElement =
-      cursorPosition < currentElementCenter
-        ? currentElement
-        : currentElement.nextElementSibling;
-
-    // возвращаем следующий элемент как результат функции
-    return nextElement;
-  };
+  }
 }

@@ -44,7 +44,7 @@ export function drop(listItems) {
       insertionPoint.className = "highlight";
 			const { height } = dragging.getBoundingClientRect();
 			insertionPoint.style.height = `${height}px`;
-
+      
 			// Определяем место вставки по оси Y и X
 			if (nextElementY) {
 				container.insertBefore(insertionPoint, nextElementY);
@@ -78,6 +78,7 @@ export function drop(listItems) {
   function getDropPositionX(x, container) {
     // Получаем все задачи в контейнере, кроме текущей перетаскиваемой.
     const tasks = Array.from(container.querySelectorAll(".task:not(.dragging)"));
+
     // Находим задачу, у которой левая граница находится правее позиции курсора.
     return tasks.find((task) => {
       const { left, right } = task.getBoundingClientRect();

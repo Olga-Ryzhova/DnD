@@ -6,7 +6,7 @@ const tasksLists = document.querySelectorAll(".tasks_list");
 // Функция для создания элемента textarea и кнопок для добавления задачи
 function createTextArea(taskList, button) {
   taskList.insertAdjacentHTML(
-    "afterBegin",
+    "afterEnd",
     `<textarea class="tasks_input" placeholder="Enter a title for this card..."></textarea>
     <div class="buttons">
       <button class="card_add">Add Card</button>
@@ -20,8 +20,9 @@ function createTextArea(taskList, button) {
 // добавление задачи
 function addTask(e, item) {
   e.preventDefault();
+  const column = e.target.closest(".board-item");
 
-  const taskInput = document.querySelector(".tasks_input");
+  const taskInput = column.querySelector(".tasks_input");
   const tasksValue = taskInput.value.trim();
 
   if (!tasksValue) return;
@@ -125,8 +126,8 @@ addTaskButtons.forEach((elem, item) => {
     closeAdd.addEventListener("click", (e) => {
       e.preventDefault();
       elem.classList.remove("hidden");
-      document.querySelector(".tasks_input").remove();
-      document.querySelector(".buttons").remove();
+      column.querySelector(".tasks_input").remove();
+      column.querySelector(".buttons").remove();
     });
 
     const cardAdd = column.querySelector(".card_add");

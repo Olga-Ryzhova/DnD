@@ -83,6 +83,7 @@ function drop(listItems) {
   function getDropPositionX(x, container) {
     // Получаем все задачи в контейнере, кроме текущей перетаскиваемой.
     const tasks = Array.from(container.querySelectorAll(".task:not(.dragging)"));
+
     // Находим задачу, у которой левая граница находится правее позиции курсора.
     return tasks.find(task => {
       const {
@@ -117,7 +118,7 @@ const tasksLists = document.querySelectorAll(".tasks_list");
 
 // Функция для создания элемента textarea и кнопок для добавления задачи
 function createTextArea(taskList, button) {
-  taskList.insertAdjacentHTML("afterBegin", `<textarea class="tasks_input" placeholder="Enter a title for this card..."></textarea>
+  taskList.insertAdjacentHTML("afterEnd", `<textarea class="tasks_input" placeholder="Enter a title for this card..."></textarea>
     <div class="buttons">
       <button class="card_add">Add Card</button>
       <button class="close_add">&times;</button>
@@ -128,7 +129,8 @@ function createTextArea(taskList, button) {
 // добавление задачи
 function addTask(e, item) {
   e.preventDefault();
-  const taskInput = document.querySelector(".tasks_input");
+  const column = e.target.closest(".board-item");
+  const taskInput = column.querySelector(".tasks_input");
   const tasksValue = taskInput.value.trim();
   if (!tasksValue) return;
   tasksLists[item].insertAdjacentHTML("afterBegin", `<div class="task" draggable="true">
@@ -218,8 +220,8 @@ addTaskButtons.forEach((elem, item) => {
     closeAdd.addEventListener("click", e => {
       e.preventDefault();
       elem.classList.remove("hidden");
-      document.querySelector(".tasks_input").remove();
-      document.querySelector(".buttons").remove();
+      column.querySelector(".tasks_input").remove();
+      column.querySelector(".buttons").remove();
     });
     const cardAdd = column.querySelector(".card_add");
     cardAdd.addEventListener("click", e => addTask(e, item));

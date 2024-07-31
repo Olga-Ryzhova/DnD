@@ -99,6 +99,7 @@
   background-color: #fff;
   cursor: grab;
   user-select: none;
+  position: relative; 
 }
 
 .task.dragging {

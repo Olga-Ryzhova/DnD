@@ -6,10 +6,19 @@ export function drop(listItems) {
   listItems.forEach((draggable) => {
     draggable.addEventListener("dragstart", () => {
       draggable.classList.add("dragging");
+
+      // Устанавливаем абсолютное позиционирование для перетаскиваемого элемента
+      draggable.style.position = 'relative';
+
     });
 
     draggable.addEventListener("dragend", () => {
       draggable.classList.remove("dragging");
+
+      // Сбрасываем позиционирование
+      draggable.style.position = '';
+      draggable.style.zIndex = '';
+  
 
       // убираем выделение всех элементов после окончания перетаскивания
       document.querySelectorAll(".highlight").forEach((elem) => {
